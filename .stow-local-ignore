@@ -1,0 +1,9 @@
+\.git
+\.gitignore
+\.github
+\.editorconfig
+
+^/README.*
+^/LICENSE.*
+
+justfile
