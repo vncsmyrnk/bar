@@ -2,6 +2,11 @@
 
 # target: google_mail.r.15m.sh
 
+SEARCH="in:inbox is:unread (category:primary OR category:primary)"
+if [[ "$TAB_MAIL_NO_PRIMARY_FILTER" =~ 1|true ]]; then
+  SEARCH="in:inbox is:unread"
+fi
+
 sanitize_text() {
   printf '%s' "$1" |
     tr '\r\n\t' '   ' |
@@ -27,7 +32,7 @@ query_error=$(mktemp) ||
 trap 'rm -f "$query_error"' EXIT
 
 if ! mail_json=$(
-  gog gmail search "in:inbox is:unread (category:primary OR category:primary)" \
+  gog gmail search "$SEARCH" \
     --max=10 \
     --count \
     --readonly \

@@ -1,3 +1,5 @@
+script_forwarded_env_allowlist_regexp := "^TAB_MAIL_NO_PRIMARY_FILTER"
+
 default:
   just --list
 
@@ -15,8 +17,22 @@ build:
       echo "using own script file name for $s" >&2
       target=$(basename "$s")
     fi
-    cp "$s" "./build/$target"
+    cat <<EOF >  "./build/$target"
+  #!/usr/bin/env bash
+  $(env | grep -i '{{script_forwarded_env_allowlist_regexp}}' | xargs -I{} echo export {})
+  trap 'rm -f \$script' EXIT
+  script=\$(mktemp)
+  cat <<'EOFF' >\$script
+  $(cat $s)
+  EOFF
+  chmod +x \$script
+  exec \$script "$@"
+  EOF
+    chmod u+x "./build/$target"
   done
+
+build-for-workspaces:
+  TAB_MAIL_NO_PRIMARY_FILTER=1 just build
 
 clean:
   rm -rf ./build
