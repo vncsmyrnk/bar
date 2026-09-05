@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# target: google_calendar.r.15m.sh
+
 CALENDARS="${CALENDARS:-}"
 NOW_EPOCH="${NOW_EPOCH:-$(date +%s)}"
 
@@ -170,11 +172,11 @@ if ! rendered=$(
     | ($events | map(select(.all_day | not)) | .[0]) as $next
     | (
         if $next == null then
-          "No timed - \($today_count) today"
+          "\($today_count)"
         elif $next.start <= $now then
-          "Now-\($next.end[11:16]) \($next.summary) - \($today_count) today"
+          "Now-\($next.end[11:16]) \($next.summary) (\($today_count))"
         else
-          "\($next.start[11:16]) \($next.summary) - \($today_count) today"
+          "\($next.start[11:16]) \($next.summary) (\($today_count))"
         end
       ) as $menu
     | (
