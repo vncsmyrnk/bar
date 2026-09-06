@@ -208,6 +208,15 @@ if ! rendered=$(
     | sort_by(.due_date // "9999-99-99", .title, .list_title)
     | . as $tasks
     | ($tasks | length) as $total
+    | ([$tasks[] | select(.due_date != null and .due_date < $today)] | length) as $overdue
+    | ($total - $overdue) as $pending
+    | (
+        if $overdue == 0 then
+          "\($pending)"
+        else
+          "\($pending) (\($overdue))"
+        end
+      ) as $title
     | (
         [
           {
@@ -241,7 +250,7 @@ if ! rendered=$(
           ]
         | map(select(.tasks | length > 0))
       ) as $sections
-    | ["\($total)", "---"]
+    | [$title, "---"]
       + (
           if $total == 0 then
             ["No pending tasks"]
