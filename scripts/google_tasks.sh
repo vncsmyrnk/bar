@@ -225,7 +225,6 @@ if ! rendered=$(
               | select(
                   .due_date != null
                   and .due_date > $today
-                  and .due_date <= $week_end
                 )
             ]
             | group_by(.due_date)
