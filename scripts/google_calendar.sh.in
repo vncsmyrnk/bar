@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# target: google_calendar.r.15m.sh
-
 CALENDARS="${CALENDARS:-}"
 NOW_EPOCH="${NOW_EPOCH:-$(date +%s)}"
 
