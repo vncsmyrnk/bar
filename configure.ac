@@ -4,6 +4,12 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PATH_PROG([JQ], [jq])
 AC_PATH_PROG([GOGCLI], [gog])
 
+AC_PATH_PROG([SHELLCHECK], [shellcheck])
+AM_CONDITIONAL([HAVE_SHELLCHECK], [test -n "$SHELLCHECK"])
+
+AC_PATH_PROG([SHFMT], [shfmt])
+AM_CONDITIONAL([HAVE_SHFMT], [test -n "$SHFMT"])
+
 AC_ARG_WITH([argosdir],
     [AS_HELP_STRING([--with-argosdir=DIR], [Path to Argos directory])],
     [argosdir="$withval"],

@@ -18,6 +18,25 @@ endif
 
 $(nodist_argos_SCRIPTS): build-scripts.stamp
 
+if HAVE_SHELLCHECK
+check-shellcheck: $(nodist_argos_SCRIPTS)
+	$(SHELLCHECK) $(nodist_argos_SCRIPTS)
+else
+check-shellcheck:
+	@echo "WARNING: shellcheck not found. Skipping linting tests."
+endif
+
+if HAVE_SHFMT
+check-shfmt: $(nodist_argos_SCRIPTS)
+	@echo "Checking format with shfmt..."
+	$(SHFMT) -ln bash -d -i 2 $(nodist_argos_SCRIPTS)
+else
+check-shfmt:
+	@echo "WARNING: shfmt not found. Skipping."
+endif
+
+check-local: check-shellcheck check-shfmt
+
 build-scripts.stamp: $(EXTRA_DIST)
 	@echo "Generating Argos scripts..."
 	@for pair in $(SCRIPT_MAPPINGS); do \

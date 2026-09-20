@@ -14,7 +14,16 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
 
       - name: Install dependencies
-        run: nix profile add nixpkgs#just nixpkgs#shellcheck nixpkgs#shfmt
+        run: nix profile add nixpkgs#shellcheck nixpkgs#shfmt
 
-      - run: just shellcheck
-      - run: just lint
+      - name: Bootstrap the build system
+        run: autoreconf --install --force
+
+      - name: Configure
+        run: ./configure --with-preset=${{ matrix.preset }}
+
+      - name: Build
+        run: make
+
+      - name: Run Distcheck
+        run: make distcheck
