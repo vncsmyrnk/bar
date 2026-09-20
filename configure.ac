@@ -1,9 +1,6 @@
 AC_INIT([bar], [1.0])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
-AC_PATH_PROG([JQ], [jq])
-AC_PATH_PROG([GOGCLI], [gog])
-
 AC_PATH_PROG([SHELLCHECK], [shellcheck])
 AM_CONDITIONAL([HAVE_SHELLCHECK], [test -n "$SHELLCHECK"])
 
