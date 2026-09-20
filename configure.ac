@@ -8,7 +8,7 @@ AC_PATH_PROG([SHFMT], [shfmt])
 AM_CONDITIONAL([HAVE_SHFMT], [test -n "$SHFMT"])
 
 AC_ARG_WITH([argosdir],
-    [AS_HELP_STRING([--with-argosdir=DIR], [Path to Argos directory])],
+    [AS_HELP_STRING([--with-argos-dir=DIR], [Path to Argos directory])],
     [argosdir="$withval"],
     [argosdir="$HOME/.config/argos"]
 )
