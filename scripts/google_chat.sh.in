@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# target: google_chat.r.15m.sh
-
 sanitize_text() {
   printf '%s' "$1" |
     tr '\r\n\t' '   ' |
