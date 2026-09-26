@@ -29,10 +29,10 @@ fi
 
 today=$(date -d "@$NOW_EPOCH" +%Y-%m-%d) ||
   fail "Error: failed to determine the current date"
-weekday=$(date -d "@$NOW_EPOCH" +%u) ||
-  fail "Error: failed to determine the current weekday"
-week_end=$(date -d "$today + $((7 - 10#$weekday)) days" +%Y-%m-%d) ||
-  fail "Error: failed to determine the end of the week"
+next_week=$(date -d "$today + 7 days" +%Y-%m-%d) ||
+  fail "Error: failed to determine the next week"
+next_month=$(date -d "$today + 30 days" +%Y-%m-%d) ||
+  fail "Error: failed to determine the next month"
 
 list_error=$(mktemp) ||
   fail "Error: failed to create temporary storage for gog errors"
@@ -171,7 +171,8 @@ tasks_json=$(jq -sc 'add // []' "$task_arrays") ||
 if ! rendered=$(
   jq -r \
     --arg today "$today" \
-    --arg week_end "$week_end" '
+    --arg next_week "$next_week" \
+    --arg next_month "$next_month" '
     def clean_text:
       (. // "(no title)")
       | tostring
@@ -207,12 +208,23 @@ if ! rendered=$(
     | . as $tasks
     | ($tasks | length) as $total
     | ([$tasks[] | select(.due_date != null and .due_date < $today)] | length) as $overdue
+    | ([$tasks[] | select(.due_date != null and .due_date == $today)] | length) as $today
+    | ([$tasks[] | select(.due_date != null and .due_date >= $today and .due_date < $next_week)] | length) as $pending_week
+    | ([$tasks[] | select(.due_date != null and .due_date >= $next_week and .due_date < $next_month)] | length) as $pending_month
     | ($total - $overdue) as $pending
     | (
-        if $overdue == 0 then
-          "\($pending)"
+        if $overdue > 0 then
+          "Overdue (\($overdue))"
+        elif $today > 0 then
+          "Today (\($today))"
+        elif $pending_week > 0 then
+          "This week (\($pending_week))"
+        elif $pending_month > 0 then
+          "This month (\($pending_month))"
+        elif $total > 0 then
+          "30d+ (\($total))"
         else
-          "\($pending) (\($overdue))"
+          "Vacation?"
         end
       ) as $title
     | (
@@ -257,7 +269,7 @@ if ! rendered=$(
           else
             reduce $sections[] as $section
               ([];
-                . + [($section.label + " | color=gray")]
+                . + [($section.label)]
                 + ($section.tasks | map(task_line))
               )
           end
