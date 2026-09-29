@@ -29,6 +29,8 @@ fi
 
 today=$(date -d "@$NOW_EPOCH" +%Y-%m-%d) ||
   fail "Error: failed to determine the current date"
+tomorrow=$(date -d "$today + 1 days" +%Y-%m-%d) ||
+  fail "Error: failed to determine the next week"
 next_week=$(date -d "$today + 7 days" +%Y-%m-%d) ||
   fail "Error: failed to determine the next week"
 next_month=$(date -d "$today + 30 days" +%Y-%m-%d) ||
@@ -171,6 +173,7 @@ tasks_json=$(jq -sc 'add // []' "$task_arrays") ||
 if ! rendered=$(
   jq -r \
     --arg today "$today" \
+    --arg tomorrow "$tomorrow" \
     --arg next_week "$next_week" \
     --arg next_month "$next_month" '
     def clean_text:
@@ -209,7 +212,8 @@ if ! rendered=$(
     | ($tasks | length) as $total
     | ([$tasks[] | select(.due_date != null and .due_date < $today)] | length) as $overdue
     | ([$tasks[] | select(.due_date != null and .due_date == $today)] | length) as $today
-    | ([$tasks[] | select(.due_date != null and .due_date >= $today and .due_date < $next_week)] | length) as $pending_week
+    | ([$tasks[] | select(.due_date != null and .due_date == $tomorrow)] | length) as $tomorrow
+    | ([$tasks[] | select(.due_date != null and .due_date >= $tomorrow and .due_date < $next_week)] | length) as $pending_week
     | ([$tasks[] | select(.due_date != null and .due_date >= $next_week and .due_date < $next_month)] | length) as $pending_month
     | ($total - $overdue) as $pending
     | (
@@ -217,6 +221,8 @@ if ! rendered=$(
           "Overdue (\($overdue))"
         elif $today > 0 then
           "Today (\($today))"
+        elif $tomorrow > 0 then
+          "Tomorrow (\($tomorrow))"
         elif $pending_week > 0 then
           "This week (\($pending_week))"
         elif $pending_month > 0 then
