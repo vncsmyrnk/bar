@@ -75,5 +75,16 @@ AS_IF([test -z "$GOOGLE_CHAT_POS"], [
 GOOGLE_CHAT_SCRIPT="google_chat.${GOOGLE_CHAT_POS}.${GOOGLE_CHAT_FREQ}.sh"
 AC_SUBST([GOOGLE_CHAT_SCRIPT])
 
+AC_ARG_VAR([CLAUDE_AGENTS_FREQ], [Claude agents refresh frequency (default: 1m)])
+AS_IF([test -z "$CLAUDE_AGENTS_FREQ"], [
+    CLAUDE_AGENTS_FREQ="1m"
+])
+AC_ARG_VAR([CLAUDE_AGENTS_POS], [Claude agents menu position (default: none)])
+AS_IF([test -z "$CLAUDE_AGENTS_POS"], [
+    CLAUDE_AGENTS_POS="r"
+])
+CLAUDE_AGENTS_SCRIPT="claude_agents.${CLAUDE_AGENTS_POS}.${CLAUDE_AGENTS_FREQ}.sh"
+AC_SUBST([CLAUDE_AGENTS_SCRIPT])
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

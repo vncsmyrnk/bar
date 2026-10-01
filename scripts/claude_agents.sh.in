@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+
+sanitize_text() {
+  printf '%s' "$1" |
+    tr '\r\n\t' '   ' |
+    sed -E 's/[[:space:]]+/ /g; s/[|]/¦/g; s/^ //; s/ $//; s/^--/—/'
+}
+
+fail() {
+  echo "Agents unavailable | color=red"
+  echo "---"
+  printf '%s | useMarkup=false ansi=false unescape=false emojize=false\n' \
+    "$(sanitize_text "$1")"
+  echo "---"
+  echo "Refresh | refresh=true"
+  exit 1
+}
+
+if ! command -v claude >/dev/null || ! command -v jq >/dev/null; then
+  fail "Error: this script needs claude and jq installed"
+fi
+
+query_error=$(mktemp) ||
+  fail "Error: failed to create temporary storage for Claude errors"
+trap 'rm -f "$query_error"' EXIT
+
+if ! agents_json=$(claude agents --json 2>"$query_error"); then
+  query_message=$(cat "$query_error")
+  fail "Error: ${query_message:-claude agents query failed}"
+fi
+if [[ -s "$query_error" ]]; then
+  fail "Error: $(cat "$query_error")"
+fi
+
+if ! jq -e '
+  type == "array"
+  and all(.[];
+    type == "object"
+    and (.cwd | type == "string")
+    and (.kind == "interactive" or .kind == "background")
+    and (.startedAt | type == "number")
+    and (.startedAt >= 0)
+    and (.startedAt == (.startedAt | floor))
+    and (
+      (has("id") | not)
+      or ((.id | type == "string") and (.id | length > 0))
+    )
+    and (
+      (has("state") | not)
+      or (.state == "working"
+        or .state == "blocked"
+        or .state == "done"
+        or .state == "failed"
+        or .state == "stopped")
+    )
+    and (
+      (has("pid") | not)
+      or ((.pid | type == "number") and (.pid > 0) and (.pid == (.pid | floor)))
+    )
+    and (
+      (has("status") | not)
+      or (.status == "busy" or .status == "waiting" or .status == "idle")
+    )
+    and (
+      (has("waitingFor") | not)
+      or (.waitingFor == "permission prompt"
+        or .waitingFor == "input needed"
+        or .waitingFor == "sandbox request"
+        or .waitingFor == "worker request"
+        or .waitingFor == "dialog open")
+    )
+    and ((.status // "") != "waiting" or has("waitingFor"))
+    and ((has("waitingFor") | not) or .status == "waiting")
+    and ((has("sessionId") | not) or (.sessionId | type == "string"))
+    and ((has("name") | not) or (.name | type == "string"))
+    and (
+      .kind != "background"
+      or (
+        (.id | type == "string")
+        and has("state")
+      )
+    )
+  )
+' >/dev/null 2>&1 <<<"$agents_json"; then
+  fail "Error: claude returned malformed agent data"
+fi
+
+if ! rendered=$(
+  jq -r '
+    def clean_text:
+      (. // "(unnamed session)")
+      | tostring
+      | gsub("[\r\n\t]+"; " ")
+      | gsub("[|]"; "¦")
+      | gsub("  +"; " ")
+      | gsub("^ +| +$"; "")
+      | sub("^--"; "—")
+      | if length == 0 then "(unnamed session)" else . end;
+
+    def needs_input:
+      .state == "blocked" or .status == "waiting";
+
+    . as $agents
+    | ($agents | length) as $active
+    | ([$agents[] | select(needs_input)] | length) as $needs_input
+    | (
+        [$agents[] | select(needs_input)]
+        + [$agents[] | select(needs_input | not)]
+      ) as $ordered
+    | [
+        "\($active) (\($needs_input))",
+        "---"
+      ]
+      + (
+          if $active == 0 then
+            ["No active agents"]
+          else
+            [
+              $ordered[]
+              | "claude · \(.name | clean_text) · input: "
+                + (if needs_input then "yes" else "no" end)
+                + " | useMarkup=false ansi=false unescape=false emojize=false"
+            ]
+          end
+        )
+      + ["---", "Refresh | refresh=true"]
+    | .[]
+  ' <<<"$agents_json"
+); then
+  fail "Error: failed to format Claude agent data"
+fi
+
+printf '🤖 %s\n' "$rendered"
