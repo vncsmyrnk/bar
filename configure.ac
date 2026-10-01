@@ -37,9 +37,9 @@ AS_IF([test -z "$GOOGLE_MAIL_FREQ"], [
 ])
 AC_ARG_VAR([GOOGLE_MAIL_POS], [Google mail menu position (default: none)])
 AS_IF([test -z "$GOOGLE_MAIL_POS"], [
-    GOOGLE_MAIL_POS=""
+    GOOGLE_MAIL_POS="r"
 ])
-GOOGLE_MAIL_SCRIPT="${GOOGLE_MAIL_POS}google_mail.${GOOGLE_MAIL_FREQ}.sh"
+GOOGLE_MAIL_SCRIPT="google_mail.${GOOGLE_MAIL_POS}.${GOOGLE_MAIL_FREQ}.sh"
 AC_SUBST([GOOGLE_MAIL_SCRIPT])
 
 AC_ARG_VAR([GOOGLE_CALENDAR_FREQ], [Google calendar refresh frequency (default: 15m)])
@@ -48,9 +48,9 @@ AS_IF([test -z "$GOOGLE_CALENDAR_FREQ"], [
 ])
 AC_ARG_VAR([GOOGLE_CALENDAR_POS], [Google calendar menu position (default: none)])
 AS_IF([test -z "$GOOGLE_CALENDAR_POS"], [
-    GOOGLE_CALENDAR_POS=""
+    GOOGLE_CALENDAR_POS="r"
 ])
-GOOGLE_CALENDAR_SCRIPT="${GOOGLE_CALENDAR_POS}google_calendar.${GOOGLE_CALENDAR_FREQ}.sh"
+GOOGLE_CALENDAR_SCRIPT="google_calendar.${GOOGLE_CALENDAR_POS}.${GOOGLE_CALENDAR_FREQ}.sh"
 AC_SUBST([GOOGLE_CALENDAR_SCRIPT])
 
 AC_ARG_VAR([GOOGLE_TASKS_FREQ], [Google tasks refresh frequency (default: 15m)])
@@ -59,9 +59,9 @@ AS_IF([test -z "$GOOGLE_TASKS_FREQ"], [
 ])
 AC_ARG_VAR([GOOGLE_TASKS_POS], [Google tasks menu position (default: none)])
 AS_IF([test -z "$GOOGLE_TASKS_POS"], [
-    GOOGLE_TASKS_POS=""
+    GOOGLE_TASKS_POS="r"
 ])
-GOOGLE_TASKS_SCRIPT="${GOOGLE_TASKS_POS}google_tasks.${GOOGLE_TASKS_FREQ}.sh"
+GOOGLE_TASKS_SCRIPT="google_tasks.${GOOGLE_TASKS_POS}.${GOOGLE_TASKS_FREQ}.sh"
 AC_SUBST([GOOGLE_TASKS_SCRIPT])
 
 AC_ARG_VAR([GOOGLE_CHAT_FREQ], [Google chat refresh frequency (default: 15m)])
@@ -70,9 +70,9 @@ AS_IF([test -z "$GOOGLE_CHAT_FREQ"], [
 ])
 AC_ARG_VAR([GOOGLE_CHAT_POS], [Google chat menu position (default: none)])
 AS_IF([test -z "$GOOGLE_CHAT_POS"], [
-    GOOGLE_CHAT_POS=""
+    GOOGLE_CHAT_POS="r"
 ])
-GOOGLE_CHAT_SCRIPT="${GOOGLE_CHAT_POS}google_chat.${GOOGLE_CHAT_FREQ}.sh"
+GOOGLE_CHAT_SCRIPT="google_chat.${GOOGLE_CHAT_POS}.${GOOGLE_CHAT_FREQ}.sh"
 AC_SUBST([GOOGLE_CHAT_SCRIPT])
 
 AC_CONFIG_FILES([Makefile])
